@@ -21,7 +21,7 @@ data Sentence =
   , _gprmcLatitude          :: Latitude
   , _gprmcLongitude         :: Longitude
   , _gprmcSpeedOverGround   :: Knot
-  , _gprmcCourseOverGround  :: Degree
+  , _gprmcCourseOverGround  :: Maybe Degree
   , _gpmrcDate              :: Day
   , _gpmrcMagneticVariation :: Maybe MagneticVariation
   , _gprmcMode              :: GprmcMode
@@ -94,7 +94,7 @@ gprmc cen = do
   _    <- comma
   spd  <- knot
   _    <- comma
-  deg  <- degree
+  deg  <- degree'
   _    <- comma
   date <- day cen
   _    <- comma

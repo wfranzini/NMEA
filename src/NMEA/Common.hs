@@ -130,6 +130,9 @@ kmh = Kmh <$> double
 degree :: Parser Degree
 degree = Degree <$> double
 
+degree' :: Parser (Maybe Degree)
+degree' = option Nothing $ Just <$> Degree <$> double
+
 checksum :: Parser Int
 checksum =  char '*' *> hexadecimal :: Parser Int
 

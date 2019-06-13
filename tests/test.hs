@@ -68,7 +68,7 @@ gprmcTest = do
             , _longitudeDirection = West
             }
           , _gprmcSpeedOverGround = Knot {_unKnot = 0.13}
-          , _gprmcCourseOverGround = Degree {_unDegree = 309.62}
+          , _gprmcCourseOverGround = Just $ Degree {_unDegree = 309.62}
           , _gpmrcDate = fromGregorian 1998 5 12
           , _gpmrcMagneticVariation = magVariation
           , _gprmcMode = Autonomous

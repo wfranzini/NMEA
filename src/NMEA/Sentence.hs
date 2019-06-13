@@ -20,7 +20,7 @@ data Sentence = GPMRC Gprmc
               | GPGSV Gpgsv
               | GPVTG Gpvtg
 
-    -- | Recommended minimum specific GNSS data
+-- | Recommended minimum specific GNSS data
 data Gprmc = Gprmc
   { _gprmcTimeUTC           :: ZonedTime
   , _gprmcStatus            :: GprmcStatus
@@ -34,7 +34,7 @@ data Gprmc = Gprmc
   }
   deriving (Eq, Show)
 
-  -- | Global Positioning System Fix Data
+-- | Global Positioning System Fix Data
 data Gpgga =
   Gpgga
   { _gpggaTimeUTC                  :: ZonedTime
@@ -51,7 +51,7 @@ data Gpgga =
   deriving (Eq, Show)
 
 
-  -- | Heading from True North
+-- | Heading from True North
 data Gphdt = Gphdt
   { _gphdtHeadingInDegrees :: Degree
   }
@@ -79,7 +79,7 @@ data Gpgsv = Gpgsv
   }
   deriving (Eq, Show)
 
-  -- | Track made good and ground speed
+-- | Track made good and ground speed
 data Gpvtg = Gpvtg
   { -- | true north bearing
     _gpvtgCourseTrue :: Maybe TrueBearing

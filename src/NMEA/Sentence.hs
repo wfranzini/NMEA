@@ -13,9 +13,15 @@ import NMEA.GPRMC
 import NMEA.GPGSA
 import NMEA.GPGSV
 
-data Sentence =
+data Sentence = GPMRC Gprmc
+              | GPGGA Gpgga
+              | GPHDT Gphdt
+              | GPGSA Gpgsa
+              | GPGSV Gpgsv
+              | GPVTG Gpvtg
+
     -- | Recommended minimum specific GNSS data
-  Gprmc
+data Gprmc = Gprmc
   { _gprmcTimeUTC           :: ZonedTime
   , _gprmcStatus            :: GprmcStatus
   , _gprmcLatitude          :: Latitude
@@ -25,8 +31,11 @@ data Sentence =
   , _gpmrcDate              :: Day
   , _gpmrcMagneticVariation :: Maybe MagneticVariation
   , _gprmcMode              :: GprmcMode
-  } |
+  }
+  deriving (Eq, Show)
+
   -- | Global Positioning System Fix Data
+data Gpgga =
   Gpgga
   { _gpggaTimeUTC                  :: ZonedTime
   , _gpggaLatitude                 :: Latitude
@@ -38,29 +47,40 @@ data Sentence =
   , _gpggaGeoidalSeparation        :: Double
   , _gpggaAgeDifferentialGPSData   :: Double
   , _gpggaDgpsReferenceStation     :: DGPSReferenceStation
-  } |
+  }
+  deriving (Eq, Show)
+
+
   -- | Heading from True North
-  Gphdt
+data Gphdt = Gphdt
   { _gphdtHeadingInDegrees :: Degree
-  } |
-  -- | GPS DOP and active satellites
-  Gpgsa
+  }
+  deriving (Eq, Show)
+
+
+-- | GPS DOP and active satellites
+data Gpgsa = Gpgsa
   { _gpgsaMode          :: GPGSAMode
   , _gpgsaPositionFix   :: PositionFix
   , _gpgsaSatellitenPRN :: [SatellitePRN]
   , _gpgsaPDOP          :: PDOP
   , _gpgsaHDOP          :: HDOP
   , _gpgsaVDOP          :: VDOP
-  } |
-  -- | GPS satellites in view
-  Gpgsv
+  }
+  deriving (Eq, Show)
+
+
+-- | GPS satellites in view
+data Gpgsv = Gpgsv
   { _gpgsvTotalMessage :: Int
   , _gpgsvMessageNumber :: Int
   , _gpgsvNumberOfSatellitesInView :: Int
   , _gpgsvSatellitesInView :: [SatelliteInView]
-  } |
+  }
+  deriving (Eq, Show)
+
   -- | Track made good and ground speed
-  Gpvtg
+data Gpvtg = Gpvtg
   { -- | true north bearing
     _gpvtgCourseTrue :: Maybe TrueBearing
   -- | magnetic bearing
@@ -74,14 +94,14 @@ data Sentence =
 
 sentence :: Century -> Parser Sentence
 sentence century =
-      gpgga
-  <|> gprmc century
-  <|> gphdt
-  <|> gpgsa
-  <|> gpgsv
-  <|> gpvtg
+      GPGGA <$> gpgga
+  <|> GPMRC <$> gprmc century
+  <|> GPHDT <$> gphdt
+  <|> GPGSA <$> gpgsa
+  <|> GPGSV <$> gpgsv
+  <|> GPVTG <$> gpvtg
 
-gprmc :: Century -> Parser Sentence
+gprmc :: Century -> Parser Gprmc
 gprmc cen = do
   _       <- string "$GPRMC,"
   time <- timeUTC
@@ -104,7 +124,7 @@ gprmc cen = do
   _    <- checksum
   return $ Gprmc time stat lat lon spd deg date mv mode
 
-gpgga :: Parser Sentence
+gpgga :: Parser Gpgga
 gpgga = do
   string "$GPGGA,"
   time <- timeUTC
@@ -129,7 +149,7 @@ gpgga = do
   _    <- checksum
   return (Gpgga time lat lon qual nsat dilu alti geoi age dgps) <?> "GPPGA"
 
-gphdt :: Parser Sentence
+gphdt :: Parser Gphdt
 gphdt = do
   string "$GPHDT"
   _    <- comma
@@ -137,7 +157,7 @@ gphdt = do
   _    <- comma <* char 'T' <* checksum
   return $ Gphdt deg
 
-gpgsa :: Parser Sentence
+gpgsa :: Parser Gpgsa
 gpgsa = do
   string "$GPGSA"
   _     <- comma
@@ -154,7 +174,7 @@ gpgsa = do
   _     <- checksum
   return $ Gpgsa mode fix  sats pdop' hdop' vdop'
 
-gpgsv :: Parser Sentence
+gpgsv :: Parser Gpgsv
 gpgsv = do
   string "$GPGSV"
   _ <- comma
@@ -167,7 +187,7 @@ gpgsv = do
   _         <- checksum
   return $ Gpgsv totalMsg msgNumber inView sats
 
-gpvtg :: Parser Sentence
+gpvtg :: Parser Gpvtg
 gpvtg = do
   string "$GPVTG"
   _     <- comma
